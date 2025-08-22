@@ -1,4 +1,4 @@
-export interface ChatMessage {
-  message: string;
-  user: string;
+export interface MansajeCont {
+  mensaje: string;
+  usuario: string;
 }

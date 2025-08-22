@@ -1,31 +1,58 @@
 import { Injectable } from '@angular/core';
-import { ChatMessage } from '../modelos/contenido';
+import {  MansajeCont } from '../modelos/contenido';
 import SockJS from 'sockjs-client';
-import { Stomp } from '@stomp/stompjs';
+import { Client, Stomp } from '@stomp/stompjs';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ServicioChat {
     private stompClient: any;
+  private messageSubject: BehaviorSubject<MansajeCont[]> = new BehaviorSubject<MansajeCont[]>([]);
 
   constructor() {
-    this.initializeWebSocketConnection();
+    this.initializeWebSocketConnection_client();
   }
 
-  initializeWebSocketConnection() {
+  initializeWebSocketConnection_stompover() {
     const url = 'http://localhost:3000/chat-socket';
     const socket = new SockJS(url);
-    this.stompClient = Stomp.over(socket);
-    this.stompClient.connect({}, (frame: any) => {
-      this.stompClient.subscribe(`/tema/$(roomId)`, (message: any) => {
-        const messageBody = JSON.parse(message.body);
-        console.log('Received message:', messageBody);
-      })
-    });
+    this.stompClient = Stomp.over(socket)
+  }
+  
+initializeWebSocketConnection_client() {
+    const url = 'http://localhost:3000/chat-socket';
+    //const socket = new SockJS(url);
+    this.stompClient = new Client();
+    this.stompClient.webSocketFactory= function () {
+         return new SockJS(url);
+       };
+    this.stompClient.activate();
   }
 
-  public sendMessage(roomId: string, message: ChatMessage) {
-    this.stompClient.send(`/sock/chat/${roomId}`, {}, JSON.stringify(message));
+  unirseSala(roomId: string){ // conexion por stompover
+    this.stompClient.connect({}, ()=>{
+      this.stompClient.subscribe(`/topic/${roomId}`, (messages: any) => {
+        const messageContent = JSON.parse(messages.body);
+        const currentMessage = this.messageSubject.getValue();
+        currentMessage.push(messageContent);
+
+        this.messageSubject.next(currentMessage);
+
+      })
+    })
+  }
+
+  sendMessage2(roomId: string, mansajeCont: MansajeCont) {//envios por stomp over
+
+    this.stompClient.send(`/app/chat/${roomId}`, {}, JSON.stringify(mansajeCont))
+  }
+
+  sendMessage(roomId: string, mansajeCont: MansajeCont) {//conexion por clase client
+    this.stompClient.publish({
+      destination: `/app/chat/${roomId}`,
+      body: JSON.stringify(mansajeCont)
+    });
   }
 }

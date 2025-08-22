@@ -1,1 +1,15 @@
-<p>chat works!</p>
+<div class="chat-container">
+    <div class="chat-header">
+        <h3>Chat</h3>
+    </div>
+    <div class="chat-messages" style="height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background: #fafafa;">
+        <!-- Aquí se mostrarán los mensajes -->
+        <div>
+            
+        </div>
+    </div>
+    <form (click)="sendMessage()" class="chat-form" style="display: flex; margin-top: 10px;">
+        <input type="text"  name="message" placeholder="Escribe un mensaje..." class="form-control" style="flex: 1; margin-right: 5px;" required>
+        <button type="submit" class="btn btn-primary" >Enviar</button>
+    </form>
+</div>

@@ -10,8 +10,9 @@ import com.example.socket.socket.entidad.MansajeCont;
 @Controller
 public class control {
     @MessageMapping("/chat/{roomId}")
-    @SendTo("/tema/{roomId}")
-    public MansajeCont chat(@DestinationVariable String roomId, MansajeCont mensaje){
-        return new MansajeCont(mensaje.getMensaje(), mensaje.getUsuario());
+    @SendTo("/topic/{roomId}")
+    public MansajeCont chat(@DestinationVariable String roomId, MansajeCont message) {
+        System.out.println(message);
+        return new MansajeCont(message.getMensaje(), message.getUsuario());
     }
 }
